@@ -10,23 +10,22 @@ from django.views.decorators.csrf import csrf_exempt
 # =============================================================================
 # FMCSA HOURS OF SERVICE CONSTANTS
 # Property-Carrying CMV Drivers | 70-Hour/8-Day | No Adverse Conditions
-# Reference: 49 CFR Part 395
 # =============================================================================
 
-MAX_DRIVING_HOURS = 11.0       # §395.3(a)(3)(i)  — 11-Hour Driving Limit
-MAX_DUTY_WINDOW = 14.0         # §395.3(a)(2)     — 14-Hour Driving Window
-MAX_CYCLE_HOURS = 70.0         # §395.3(b)(2)     — 70-Hour/8-Day On-Duty Limit
+MAX_DRIVING_HOURS = 11.0       #     — 11-Hour Driving Limit
+MAX_DUTY_WINDOW = 14.0         #     — 14-Hour Driving Window
+MAX_CYCLE_HOURS = 70.0         #     — 70-Hour/8-Day On-Duty Limit
 CYCLE_DAYS = 8                 # Rolling 8 consecutive days
-BREAK_AFTER_HOURS = 8.0        # §395.3(a)(3)(ii) — Must break after 8h driving
+BREAK_AFTER_HOURS = 8.0        #      — Must break after 8h driving
 BREAK_DURATION = 0.5           # 30 minutes
-FULL_REST_HOURS = 10.0         # §395.3(a)(1)     — 10 consecutive hours off
-RESTART_HOURS = 34.0           # §395.3(c)(1)     — 34-Hour Restart
+FULL_REST_HOURS = 10.0         #      — 10 consecutive hours off
+RESTART_HOURS = 34.0           #      — 34-Hour Restart
 FUEL_INTERVAL_MILES = 1000.0   # Fuel stop every 1,000 miles
 FUEL_STOP_HOURS = 0.5          # 30 minutes for fueling
 PICKUP_HOURS = 1.0             # 1 hour for pickup/loading
 DROPOFF_HOURS = 1.0            # 1 hour for drop-off/unloading
 
-# Sleeper Berth Split Provision (§395.1(g))
+# Sleeper Berth Split Provision
 # Allows splitting the 10-hour off-duty into two periods:
 #   Period 1: >= 7 consecutive hours in the sleeper berth
 #   Period 2: >= 2 hours off-duty or in sleeper berth (we use 3h → 7+3=10)
