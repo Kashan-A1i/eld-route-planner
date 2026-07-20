@@ -1,36 +1,3 @@
-"""
-ELD Route Planner — Backend HOS Engine
-=======================================
-
-FMCSA Hours of Service (HOS) compliant trip planning engine for
-property-carrying CMV drivers operating under the 70-hour/8-day rule.
-
-Reference: 49 CFR Part 395 — Hours of Service of Drivers
-           Federal Motor Carrier Safety Administration (FMCSA)
-
-Assumptions:
-    - Property-carrying driver (not passenger-carrying)
-    - 70-hour / 8 consecutive days cycle (carrier operates every day)
-    - No adverse driving conditions (no 2-hour extension per §395.1(b))
-    - Fueling at least once every 1,000 miles
-    - 1 hour for pickup/loading, 1 hour for drop-off/unloading
-
-Duty Statuses (§395.8):
-    OFF  — Off Duty: driver relieved of all duties, free to leave vehicle
-    SB   — Sleeper Berth: resting in the sleeper berth compartment
-    D    — Driving: operating the CMV on a public road
-    ON   — On Duty (Not Driving): all other work (loading, fueling,
-           inspections, yard moves, waiting for dispatch, etc.)
-
-Note on Personal Conveyance & Yard Moves:
-    - Personal Conveyance (§392.3): classified as Off Duty when the
-      driver uses the CMV for personal reasons while relieved of all
-      work. Not simulated in trip planning (driver-initiated).
-    - Yard Moves (§395.8(j)(3)): classified as On Duty (Not Driving)
-      when moving the CMV within a private terminal. Not simulated
-      in trip planning (facility-specific).
-"""
-
 import json
 import math
 import time as time_module
