@@ -1265,8 +1265,90 @@ def hos_status(request):
 # URL CONFIGURATION
 # =============================================================================
 
+# urlpatterns moved to bottom
+# =============================================================================
+# AUTHENTICATION ENDPOINTS
+# =============================================================================
+from django.contrib.auth import authenticate, login as django_login, logout as django_logout
+from django.contrib.auth.models import User
+
+@csrf_exempt
+def auth_register(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+        
+        if not email or not password:
+            return JsonResponse({"error": "Email and password required"}, status=400)
+            
+        if User.objects.filter(username=email).exists():
+            return JsonResponse({"error": "User with this email already exists"}, status=400)
+            
+        user = User.objects.create_user(username=email, email=email, password=password)
+        user.first_name = email.split('@')[0]
+        user.save()
+        
+        # Log them in automatically
+        django_login(request, user)
+        return JsonResponse({"status": "success", "user": {"email": user.email, "name": user.first_name}})
+        
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def auth_login(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+        
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            django_login(request, user)
+            return JsonResponse({"status": "success", "user": {"email": user.email, "name": user.first_name}})
+        else:
+            return JsonResponse({"error": "Invalid credentials"}, status=401)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def auth_logout(request):
+    if request.method == 'POST':
+        django_logout(request)
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+@csrf_exempt
+def auth_forgot_password(request):
+    if request.method == 'POST':
+        # Mock success for forgot password
+        return JsonResponse({"status": "success", "message": "If an account exists, a reset link has been sent."})
+    return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+@csrf_exempt
+def auth_me(request):
+    if request.user.is_authenticated:
+        return JsonResponse({
+            "status": "success", 
+            "user": {
+                "email": request.user.email,
+                "name": request.user.first_name
+            }
+        })
+    return JsonResponse({"status": "unauthenticated"}, status=401)
+
 urlpatterns = [
     path('api/test/', test_api),
     path('api/plan-trip/', plan_trip),
     path('api/hos-status/', hos_status),
+    path('api/auth/register/', auth_register),
+    path('api/auth/login/', auth_login),
+    path('api/auth/logout/', auth_logout),
+    path('api/auth/forgot-password/', auth_forgot_password),
+    path('api/auth/me/', auth_me),
 ]

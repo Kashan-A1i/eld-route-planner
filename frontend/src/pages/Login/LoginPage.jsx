@@ -4,14 +4,16 @@ import { useAuth } from '../../context/AuthContext';
 import './LoginPage.css';
 
 const LoginPage = () => {
-  const { login, loginAsGuest } = useAuth();
+  const { login, register, loginAsGuest } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [forgotPopup, setForgotPopup] = useState('');
   
-  const handleLogin = (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
     
@@ -25,9 +27,34 @@ const LoginPage = () => {
       return;
     }
     
-    const success = login(email, password);
-    if (!success) {
-      setError('Invalid credentials.');
+    if (isRegistering) {
+      const res = await register(email, password);
+      if (!res.success) setError(res.error);
+    } else {
+      const res = await login(email, password);
+      if (!res.success) setError(res.error);
+    }
+  };
+
+  const handleForgot = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setError('Please enter your email address first.');
+      return;
+    }
+    try {
+      const res = await fetch('http://localhost:8000/api/auth/forgot-password/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setForgotPopup(data.message);
+        setTimeout(() => setForgotPopup(''), 4000);
+      }
+    } catch (e) {
+      setError('Failed to send request.');
     }
   };
 
@@ -48,7 +75,7 @@ const LoginPage = () => {
           </div>
         )}
 
-        <form className="login-form" onSubmit={handleLogin}>
+        <form className="login-form" onSubmit={handleAuth}>
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div className="input-wrapper">
@@ -88,13 +115,31 @@ const LoginPage = () => {
               <input type="checkbox" className="checkbox-input" />
               Remember me
             </label>
-            <a href="#" className="forgot-password">Forgot password?</a>
+            <div style={{ position: 'relative' }}>
+              <a href="#" className="forgot-password" onClick={handleForgot}>Forgot password?</a>
+              {forgotPopup && (
+                <div style={{
+                  position: 'absolute', top: '-45px', right: 0, backgroundColor: 'var(--primary-accent)', 
+                  color: 'white', padding: '8px 12px', borderRadius: '6px', fontSize: '12px',
+                  boxShadow: '0 4px 12px rgba(37,99,235,0.3)', whiteSpace: 'nowrap', zIndex: 10
+                }}>
+                  {forgotPopup}
+                </div>
+              )}
+            </div>
           </div>
           
           <button type="submit" className="btn-primary">
-            Sign In
+            {isRegistering ? 'Create Account' : 'Sign In'}
           </button>
         </form>
+        
+        <div className="auth-toggle">
+          {isRegistering ? "Already have an account? " : "Don't have an account? "}
+          <button type="button" className="text-btn" onClick={() => { setIsRegistering(!isRegistering); setError(''); }}>
+            {isRegistering ? 'Sign In' : 'Sign Up'}
+          </button>
+        </div>
         
         <div className="login-divider">or</div>
         

@@ -4,8 +4,9 @@
   left: 0;
   width: var(--sidebar-width);
   height: 100vh;
-  background-color: var(--sidebar-bg);
-  color: var(--text-inverse);
+  background-color: #18181b;
+  border-right: 1px solid #27272a;
+  color: #f4f4f5;
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -16,11 +17,10 @@
   display: flex;
   align-items: center;
   padding: 0 24px;
-  border-bottom: 1px solid var(--border-dark);
 }
 
 .sidebar-logo-icon {
-  color: var(--primary-accent);
+  color: #f97316; /* Sunset Orange */
   margin-right: 12px;
 }
 
@@ -45,23 +45,25 @@
   align-items: center;
   width: 100%;
   padding: 12px 24px;
-  color: var(--text-inverse-muted);
+  color: #a1a1aa;
   font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.2s ease-in-out;
   text-align: left;
+  border-left: 3px solid transparent;
 }
 
 .nav-button:hover {
-  background-color: var(--sidebar-hover);
-  color: var(--text-inverse);
+  background-color: #27272a;
+  color: #ffffff;
 }
 
 .nav-button.active {
-  background-color: var(--sidebar-bg-lighter);
-  color: var(--text-inverse);
-  border-left: 4px solid var(--primary-accent);
-  padding-left: 20px;
+  background-color: transparent;
+  color: #f97316;
+  border-left: 3px solid #f97316;
+  padding-left: 21px; /* 24 - 3 to keep icon aligned */
+  font-weight: 600;
 }
 
 .nav-icon {
@@ -69,44 +71,45 @@
 }
 
 .sidebar-footer {
-  padding: 16px 24px 24px;
-  border-top: 1px solid var(--border-dark);
+  padding: 16px 0 24px 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .logout-button {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: flex-start;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: var(--text-inverse-muted);
-  font-size: 0.875rem;
+  padding: 12px 24px;
+  color: #a1a1aa;
+  background-color: transparent;
+  font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.2s ease;
-  border: 1px solid var(--border-dark);
+  border: none;
+  border-left: 3px solid transparent;
+}
+
+.logout-button .nav-icon {
+  margin-right: 16px;
 }
 
 .logout-button:hover {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.3);
+  background-color: #27272a;
+  color: #ffffff;
 }
 
 .fmcsa-badge {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background-color: rgba(13, 148, 136, 0.1);
-  color: var(--primary-accent);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  justify-content: flex-start;
+  gap: 12px;
+  background-color: transparent;
+  color: #71717a;
+  padding: 12px 24px;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;

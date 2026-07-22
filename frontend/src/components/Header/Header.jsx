@@ -37,7 +37,7 @@ const Header = ({ currentPage = 'dashboard', user }) => {
   });
 
   const driverName = user?.name || 'Guest Driver';
-  const truckNumber = user?.truckNumber || 'TRK-0000';
+  const truckNumber = user?.truckNumber || 'No Vehicle Assigned';
   const pageTitle = PAGE_TITLES[currentPage] || 'Dashboard';
 
   return (
