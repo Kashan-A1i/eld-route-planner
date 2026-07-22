@@ -75,7 +75,10 @@ function App() {
     setHasTripData(false);
 
     try {
-      const res = await fetch('http://localhost:8000/api/plan-trip/', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL 
+        ? import.meta.env.VITE_API_BASE_URL.replace('/auth', '') 
+        : 'http://localhost:8000/api';
+      const res = await fetch(`${baseUrl}/plan-trip/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tripForm),
