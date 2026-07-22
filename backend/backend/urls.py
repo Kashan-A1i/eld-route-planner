@@ -49,12 +49,30 @@ def get_coordinates(location_name):
             f"https://nominatim.openstreetmap.org/search"
             f"?q={location_name}&format=json&limit=1"
         )
-        headers = {'User-Agent': 'ELDRoutePlanner/1.0'}
-        resp = requests.get(url, headers=headers, timeout=10).json()
-        if resp:
-            return f"{resp[0]['lon']},{resp[0]['lat']}"
+        headers = {
+            'User-Agent': 'ELDRoutePlanner/1.0 (support@eldrouteplanner.com)'
+        }
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data:
+                return f"{data[0]['lon']},{data[0]['lat']}"
     except Exception:
         pass
+
+    # Fallback to geocode.xyz if Nominatim fails or is rate-limited
+    try:
+        time_module.sleep(1.2)
+        url = "https://geocode.xyz/"
+        params = {"locate": location_name, "json": "1"}
+        resp = requests.get(url, params=params, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get('latt') and not str(data['latt']).startswith('Throttled'):
+                return f"{data['longt']},{data['latt']}"
+    except Exception:
+        pass
+
     return None
 
 def get_route(coords_string):
