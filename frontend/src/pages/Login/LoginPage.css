@@ -111,7 +111,7 @@
   pointer-events: none;
 }
 
-.form-input {
+.login-form .form-input {
   width: 100%;
   padding: 10px 12px;
   background: #27272a;
@@ -123,21 +123,21 @@
   box-sizing: border-box;
 }
 
-.form-input::placeholder {
+.login-form .form-input::placeholder {
   color: #71717a;
 }
 
-.form-input:focus {
+.login-form .form-input:focus {
   outline: none;
   border-color: #f97316;
   background: #27272a;
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
 }
 
-.form-input:-webkit-autofill,
-.form-input:-webkit-autofill:hover, 
-.form-input:-webkit-autofill:focus, 
-.form-input:-webkit-autofill:active {
+.login-form .form-input:-webkit-autofill,
+.login-form .form-input:-webkit-autofill:hover, 
+.login-form .form-input:-webkit-autofill:focus, 
+.login-form .form-input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 30px #27272a inset !important;
   -webkit-text-fill-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s;
