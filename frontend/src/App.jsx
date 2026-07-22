@@ -186,7 +186,14 @@ function App() {
                  totalDays={Object.keys(dailyLogs).length}
                />;
       case 'records':
-        return <RecordsPage active={hasTripData} dailyLogs={dailyLogs} />;
+        return <RecordsPage 
+                 active={hasTripData} 
+                 dailyLogs={dailyLogs} 
+                 onViewRecord={(dayId) => {
+                   setCurrentDay(parseInt(dayId));
+                   handleNavigate('logs');
+                 }}
+               />;
       case 'profile':
         return <ProfilePage />;
       case 'settings':

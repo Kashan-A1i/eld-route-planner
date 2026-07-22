@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Download, CheckCircle, Clock, AlertCircle, Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import './RecordsPage.css';
 
-const RecordsPage = ({ active = false, dailyLogs = {} }) => {
+const RecordsPage = ({ active = false, dailyLogs = {}, onViewRecord }) => {
   const [popupMsg, setPopupMsg] = useState('');
   const formatHours = (decimalHours) => {
     const h = Math.floor(decimalHours);
@@ -17,8 +17,8 @@ const RecordsPage = ({ active = false, dailyLogs = {} }) => {
     const dateStr = d.toISOString().split('T')[0];
     const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
 
-    const driveH = log.summary?.total_driving_hours || 0;
-    const dutyH = log.summary?.total_on_duty_hours || 0;
+    const driveH = log.total_driving || 0;
+    const dutyH = log.total_on_duty_not_driving || 0;
 
     return {
       id: log.day,
@@ -27,7 +27,7 @@ const RecordsPage = ({ active = false, dailyLogs = {} }) => {
       driving: formatHours(driveH),
       onDuty: formatHours(dutyH),
       total: formatHours(driveH + dutyH),
-      miles: Math.round(log.summary?.total_miles || 0),
+      miles: Math.round(log.total_miles || 0),
       status: 'Pending'
     };
   });
@@ -167,7 +167,7 @@ const RecordsPage = ({ active = false, dailyLogs = {} }) => {
                   <td>{record.miles}</td>
                   <td>{getStatusBadge(record.status)}</td>
                   <td>
-                    <button className="btn-icon"><Eye size={16} /> View</button>
+                    <button className="btn-icon" onClick={() => onViewRecord && onViewRecord(record.id)}><Eye size={16} /> View</button>
                   </td>
                 </tr>
               ))
