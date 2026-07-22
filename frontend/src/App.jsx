@@ -1,108 +1,361 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useAuth } from './context/AuthContext';
+import './App.css';
+
+// Layout
+import Sidebar from './components/Sidebar/Sidebar';
+import Header from './components/Header/Header';
+
+// Dashboard components
+import HOSChart from './components/HOSChart/HOSChart';
+import StatusCard from './components/StatusCard/StatusCard';
+import LogEntries from './components/LogEntries/LogEntries';
+import ViolationsCard from './components/ViolationsCard/ViolationsCard';
+import HoursRecap from './components/HoursRecap/HoursRecap';
+
+// Pages
+import LoginPage from './pages/Login/LoginPage';
+import LogsPage from './pages/Logs/LogsPage';
+import RecordsPage from './pages/Records/RecordsPage';
+import ProfilePage from './pages/Profile/ProfilePage';
+import SettingsPage from './pages/Settings/SettingsPage';
+import HelpPage from './pages/Help/HelpPage';
+
+import { MapPin, Navigation, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function App() {
-  const [statusMessage, setStatusMessage] = useState("Connecting to Django...");
-  const [tripLogs, setTripLogs] = useState([]); 
-  const [formData, setFormData] = useState({
+  const { user, isAuthenticated, logout } = useAuth();
+  const [currentPage, setCurrentPage] = useState('dashboard');
+
+  // ----- Trip Planner State (connected to backend) -----
+  const [tripForm, setTripForm] = useState({
     currentLocation: '',
     pickupLocation: '',
     dropoffLocation: '',
-    cycleUsed: 0
+    cycleUsed: 0,
   });
+  const [tripStatus, setTripStatus] = useState(null);
+  const [isPlanning, setIsPlanning] = useState(false);
 
-  useEffect(() => {
-    fetch('http://localhost:8000/api/test/')
-      .then((res) => res.json())
-      .then(() => setStatusMessage("Backend Connected ✓"))
-      .catch(() => setStatusMessage("Backend Disconnected ✗"));
+  // ----- Backend-driven ELD data -----
+  const [tripLogs, setTripLogs] = useState([]);
+  const [dailyLogs, setDailyLogs] = useState({});
+  const [currentDay, setCurrentDay] = useState(1);
+  const [hasTripData, setHasTripData] = useState(false);
+
+  const handleNavigate = useCallback((page) => {
+    setCurrentPage(page);
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleLogout = useCallback(() => {
+    logout();
+    setCurrentPage('dashboard');
+    setTripLogs([]);
+    setHosEntries([]);
+    setDailyLogs({});
+    setHasTripData(false);
+    setTripStatus(null);
+  }, [logout]);
+
+  const handleTripFormChange = (e) => {
+    const { name, value } = e.target;
+    setTripForm((prev) => ({
+      ...prev,
+      [name]: name === 'cycleUsed' ? parseFloat(value) || 0 : value,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handlePlanTrip = async (e) => {
     e.preventDefault();
-    setStatusMessage("Calculating route...");
-    setTripLogs([]); // Clear old logs
+    setIsPlanning(true);
+    setTripStatus({ type: 'loading', message: 'Calculating route & HOS schedule…' });
+    setTripLogs([]);
+    setDailyLogs({});
+    setCurrentDay(1);
+    setHasTripData(false);
 
-    fetch('http://localhost:8000/api/plan-trip/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    })
-    .then(res => res.json())
-    .then(data => {
-      if(data.error) {
-        setStatusMessage("Error: " + data.error);
+    try {
+      const res = await fetch('http://localhost:8000/api/plan-trip/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tripForm),
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        setTripStatus({ type: 'error', message: data.error });
       } else {
-        setStatusMessage(data.message);
-        // THE FIX: We add "|| []" so if logs are missing, it defaults to an empty list instead of crashing!
-        setTripLogs(data.logs || []); 
+        setTripStatus({ type: 'success', message: data.message });
+        setTripLogs(data.logs || []);
+        setDailyLogs(data.daily_logs || {});
+        setCurrentDay(1);
+        setHasTripData(true);
       }
-    })
-    .catch(err => setStatusMessage("Error sending data to Django."));
+    } catch {
+      setTripStatus({
+        type: 'error',
+        message: 'Unable to reach the backend. Make sure Django is running on port 8000.',
+      });
+    } finally {
+      setIsPlanning(false);
+    }
   };
 
-  const containerStyle = { fontFamily: 'system-ui, sans-serif', maxWidth: '600px', margin: '3rem auto', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', border: '1px solid #e2e8f0', backgroundColor: '#ffffff' };
-  const inputGroupStyle = { marginBottom: '1.25rem' };
-  const labelStyle = { display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#334155' };
-  const inputStyle = { width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem', boxSizing: 'border-box' };
-  const buttonStyle = { width: '100%', padding: '0.75rem', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer', marginTop: '1rem' };
+  // Derive hosEntries dynamically from currentDay
+  const hosEntries = dailyLogs[String(currentDay)]?.entries || [];
+
+  // Convert backend logs to LogEntries format (Sync exactly with HOS Chart current day data)
+  const formattedLogEntries = hosEntries.length > 0
+    ? hosEntries.slice(0, 10).map((log, i) => {
+        const startH = log.start_hour || 0;
+        const endH = log.end_hour || 0;
+        const formatTime = (h) => {
+          const hrs = Math.floor(h);
+          const mins = Math.round((h - hrs) * 60);
+          const period = hrs >= 12 ? 'PM' : 'AM';
+          const display = hrs === 0 ? 12 : hrs > 12 ? hrs - 12 : hrs;
+          return `${display}:${String(mins).padStart(2, '0')} ${period}`;
+        };
+        const duration = log.hours || 0;
+        const durH = Math.floor(duration);
+        const durM = Math.round((duration - durH) * 60);
+        const statusMap = { D: 'Driving', ON: 'On Duty (Not Driving)', OFF: 'Off Duty', SB: 'Sleeper Berth' };
+        
+        let locationStr = '—';
+        if (log.status_code === 'D') {
+          locationStr = 'En Route';
+        } else if (i === 0) {
+          locationStr = tripForm.currentLocation || 'Origin';
+        } else if (i === hosEntries.length - 1) {
+          locationStr = tripForm.dropoffLocation || 'Destination';
+        } else {
+          locationStr = tripForm.pickupLocation || 'Stop';
+        }
+
+        return {
+          id: i + 1,
+          time: `${formatTime(startH)} - ${formatTime(endH)}`,
+          duration: `${durH}h ${String(durM).padStart(2, '0')}m`,
+          status: statusMap[log.status_code] || log.status_label || 'Unknown',
+          vehicle: user?.truckNumber || 'TRK-0000',
+          location: locationStr,
+        };
+      })
+    : [];
+
+  // ===============================
+  // If not authenticated → show Login
+  // ===============================
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // Calculate remaining hours for StatusCard
+  let driveTotal = 0;
+  let shiftTotal = 0;
+  if (hosEntries) {
+    hosEntries.forEach(e => {
+      if (e.status_code === 'D') driveTotal += e.hours;
+      if (e.status_code === 'D' || e.status_code === 'ON') shiftTotal += e.hours;
+    });
+  }
+  const driveRemaining = Math.max(0, 11 - driveTotal);
+  const shiftRemaining = Math.max(0, 14 - shiftTotal);
+  const cycleRemaining = Math.max(0, 70 - shiftTotal - (tripForm.cycleUsed || 0));
+
+  // Derive current status from the last log entry
+  const lastLog = tripLogs.length > 0 ? tripLogs[tripLogs.length - 1] : null;
+  const statusCodeToLabel = { D: 'DRIVING', ON: 'ON DUTY', OFF: 'OFF DUTY', SB: 'SLEEPER' };
+  const currentStatus = lastLog ? (statusCodeToLabel[lastLog.status_code] || lastLog.status_label || 'OFF DUTY') : 'OFF DUTY';
+  const currentStatusCode = lastLog ? lastLog.status_code : 'OFF';
+
+  // ===============================
+  // Render the page for current nav
+  // ===============================
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'logs':
+        return <LogsPage 
+                 hosEntries={hosEntries} 
+                 tripForm={tripForm} 
+                 currentDay={currentDay}
+                 setCurrentDay={setCurrentDay}
+                 totalDays={Object.keys(dailyLogs).length}
+               />;
+      case 'records':
+        return <RecordsPage active={hasTripData} dailyLogs={dailyLogs} />;
+      case 'profile':
+        return <ProfilePage />;
+      case 'settings':
+        return <SettingsPage />;
+      case 'help':
+        return <HelpPage />;
+      case 'dashboard':
+      default:
+        return (
+          <div className="dashboard-container">
+            {/* ---- HOS Timeline (Full Width) ---- */}
+            <section className="dashboard-hos-section" id="hos-summary">
+              {hasTripData && Object.keys(dailyLogs).length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '0 8px' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)' }}>Daily Activity Log</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-main)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <button 
+                      className="icon-btn" 
+                      onClick={() => setCurrentDay(Math.max(1, currentDay - 1))}
+                      disabled={currentDay === 1}
+                      style={{ padding: '4px', opacity: currentDay === 1 ? 0.3 : 1, cursor: currentDay === 1 ? 'not-allowed' : 'pointer' }}
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <span style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary)', width: '85px', textAlign: 'center' }}>
+                      Day {currentDay} of {Object.keys(dailyLogs).length}
+                    </span>
+                    <button 
+                      className="icon-btn" 
+                      onClick={() => setCurrentDay(Math.min(Object.keys(dailyLogs).length, currentDay + 1))}
+                      disabled={currentDay === Object.keys(dailyLogs).length}
+                      style={{ padding: '4px', opacity: currentDay === Object.keys(dailyLogs).length ? 0.3 : 1, cursor: currentDay === Object.keys(dailyLogs).length ? 'not-allowed' : 'pointer' }}
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              )}
+              <HOSChart entries={hosEntries} />
+            </section>
+
+            {/* ---- Middle Row: Status + Log Table ---- */}
+            <section className="dashboard-middle-grid">
+              <div id="current-status">
+                <StatusCard 
+                  active={hasTripData} 
+                  dailyLogs={dailyLogs}
+                />
+              </div>
+              <div id="log-entries">
+                <LogEntries
+                  entries={formattedLogEntries}
+                  currentDay={currentDay}
+                  onViewLogbook={() => handleNavigate('logs')}
+                  onEditLog={() => handleNavigate('logs')}
+                  onCertifyLog={() => {}}
+                />
+              </div>
+            </section>
+
+            {/* ---- Bottom Row: Violations + 7-Day Recap ---- */}
+            <section className="dashboard-bottom-grid">
+              <div id="violations-card">
+                <ViolationsCard />
+              </div>
+              <div id="hours-recap">
+                <HoursRecap active={hasTripData} dailyLogs={dailyLogs} />
+              </div>
+            </section>
+
+            {/* ---- Trip Planner (Connected to Backend) ---- */}
+            <section className="dashboard-trip-section" id="trip-planner">
+              <div className="trip-planner-card">
+                <h2>
+                  <Navigation size={20} />
+                  Trip Planner
+                </h2>
+                <p className="section-subtitle">
+                  Plan a route with FMCSA-compliant HOS scheduling
+                </p>
+
+                <form className="trip-form" onSubmit={handlePlanTrip}>
+                  <div className="trip-form-group">
+                    <label htmlFor="currentLocation">Current Location</label>
+                    <input
+                      type="text"
+                      id="currentLocation"
+                      name="currentLocation"
+                      value={tripForm.currentLocation}
+                      onChange={handleTripFormChange}
+                      placeholder="e.g., Chicago, IL"
+                      required
+                    />
+                  </div>
+
+                  <div className="trip-form-group">
+                    <label htmlFor="pickupLocation">Pickup Location</label>
+                    <input
+                      type="text"
+                      id="pickupLocation"
+                      name="pickupLocation"
+                      value={tripForm.pickupLocation}
+                      onChange={handleTripFormChange}
+                      placeholder="e.g., Detroit, MI"
+                      required
+                    />
+                  </div>
+
+                  <div className="trip-form-group">
+                    <label htmlFor="dropoffLocation">Dropoff Location</label>
+                    <input
+                      type="text"
+                      id="dropoffLocation"
+                      name="dropoffLocation"
+                      value={tripForm.dropoffLocation}
+                      onChange={handleTripFormChange}
+                      placeholder="e.g., Atlanta, GA"
+                      required
+                    />
+                  </div>
+
+                  <div className="trip-form-group">
+                    <label htmlFor="cycleUsed">Cycle Used (hrs)</label>
+                    <input
+                      type="number"
+                      id="cycleUsed"
+                      name="cycleUsed"
+                      value={tripForm.cycleUsed}
+                      onChange={handleTripFormChange}
+                      min="0"
+                      max="70"
+                      step="0.5"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="trip-submit-btn"
+                    disabled={isPlanning}
+                  >
+                    {isPlanning ? 'Planning…' : 'Plan Trip'}
+                  </button>
+                </form>
+
+                {tripStatus && (
+                  <div className={`trip-status ${tripStatus.type}`}>
+                    {tripStatus.type === 'success' && <MapPin size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />}
+                    {tripStatus.type === 'loading' && <Truck size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />}
+                    {tripStatus.message}
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '2rem 1rem' }}>
-      <div style={containerStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ margin: 0, color: '#0f172a' }}>LogMapper</h1>
-          <span style={{ fontSize: '0.875rem', color: statusMessage.includes('✓') || statusMessage.includes('Success') ? '#16a34a' : '#dc2626', fontWeight: '500' }}>
-            {statusMessage}
-          </span>
-        </div>
+    <div className="app-layout">
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
+        user={user}
+      />
+      <Header currentPage={currentPage} user={user} />
 
-        <form onSubmit={handleSubmit}>
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>Current Location</label>
-            <input type="text" name="currentLocation" value={formData.currentLocation} onChange={handleChange} placeholder="e.g., Chicago" style={inputStyle} required />
-          </div>
-
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>Pickup Location</label>
-            <input type="text" name="pickupLocation" value={formData.pickupLocation} onChange={handleChange} placeholder="e.g., Detroit" style={inputStyle} required />
-          </div>
-
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>Dropoff Location</label>
-            <input type="text" name="dropoffLocation" value={formData.dropoffLocation} onChange={handleChange} placeholder="e.g., Atlanta" style={inputStyle} required />
-          </div>
-
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>Current Cycle Used (Hours)</label>
-            <input type="number" name="cycleUsed" value={formData.cycleUsed} onChange={handleChange} min="0" max="70" step="0.5" style={inputStyle} required />
-          </div>
-
-          <button type="submit" style={buttonStyle}>Calculate Route & Logs</button>
-        </form>
-
-        {/* --- Display the Logs safely --- */}
-        {tripLogs && tripLogs.length > 0 && (
-          <div style={{ marginTop: '2rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '1rem' }}>Hours of Service Schedule</h2>
-            {tripLogs.map((log, index) => (
-              <div key={index} style={{ 
-                padding: '0.75rem', 
-                marginBottom: '0.5rem', 
-                backgroundColor: log.status === 'Driving' ? '#eff6ff' : '#f1f5f9',
-                borderLeft: log.status === 'Driving' ? '4px solid #3b82f6' : '4px solid #94a3b8',
-                borderRadius: '0 6px 6px 0'
-              }}>
-                <strong>Day {log.day}:</strong> {log.status} for {log.hours} hours
-              </div>
-            ))}
-          </div>
-        )}
-
-      </div>
+      <main className="main-content">
+        {renderPage()}
+      </main>
     </div>
   );
 }

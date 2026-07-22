@@ -1,0 +1,113 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--sidebar-bg);
+  color: var(--text-inverse);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.sidebar-logo-icon {
+  color: var(--primary-accent);
+  margin-right: 12px;
+}
+
+.sidebar-logo-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 24px 0;
+  overflow-y: auto;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 24px;
+  color: var(--text-inverse-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  text-align: left;
+}
+
+.nav-button:hover {
+  background-color: var(--sidebar-hover);
+  color: var(--text-inverse);
+}
+
+.nav-button.active {
+  background-color: var(--sidebar-bg-lighter);
+  color: var(--text-inverse);
+  border-left: 4px solid var(--primary-accent);
+  padding-left: 20px;
+}
+
+.nav-icon {
+  margin-right: 16px;
+}
+
+.sidebar-footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--border-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-inverse-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-dark);
+}
+
+.logout-button:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.fmcsa-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: rgba(13, 148, 136, 0.1);
+  color: var(--primary-accent);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

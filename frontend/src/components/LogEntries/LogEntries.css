@@ -1,0 +1,173 @@
+.log-entries-card {
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.log-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.log-badge {
+  background-color: var(--bg-main);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.table-container {
+  overflow-x: auto;
+  flex-grow: 1;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.log-table th {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.log-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--bg-main);
+}
+
+.log-table tbody tr:hover {
+  background-color: var(--bg-main);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-off-duty {
+  background-color: var(--bg-main);
+  color: var(--status-offduty);
+}
+
+.status-on-duty {
+  background-color: rgba(234, 88, 12, 0.1);
+  color: var(--status-onduty);
+}
+
+.status-driving {
+  background-color: rgba(5, 150, 105, 0.1);
+  color: var(--status-driving);
+}
+
+.status-sleeper {
+  background-color: rgba(2, 132, 199, 0.1);
+  color: var(--status-sleeper);
+}
+
+.log-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.log-actions button {
+  padding: 0 20px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  line-height: 1;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.btn-outline:hover {
+  background-color: var(--bg-main);
+  border-color: var(--text-muted);
+}
+
+.btn-primary {
+  background-color: var(--primary-accent);
+  border: 1px solid var(--primary-accent);
+  color: var(--text-inverse);
+}
+
+.btn-primary:hover {
+  filter: brightness(0.9);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Empty State ---- */
+.log-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.log-empty-icon {
+  color: var(--border-dark);
+  margin-bottom: 12px;
+}
+
+.log-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+.log-empty-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+

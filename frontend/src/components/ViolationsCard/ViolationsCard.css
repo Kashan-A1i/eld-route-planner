@@ -1,0 +1,76 @@
+.violations-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.violations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.violations-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #334155;
+}
+
+.shield-icon {
+  color: #22c55e;
+}
+
+.violations-content {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.violations-count {
+  font-size: 48px;
+  font-weight: 700;
+  color: #22c55e;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.violations-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rules-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #475569;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.rules-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.check-icon {
+  color: #22c55e;
+}
