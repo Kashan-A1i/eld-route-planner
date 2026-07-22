@@ -50,9 +50,15 @@ function App() {
   const handleLogout = useCallback(() => {
     logout();
     setCurrentPage('dashboard');
+    setTripForm({
+      currentLocation: '',
+      pickupLocation: '',
+      dropoffLocation: '',
+      cycleUsed: 0,
+    });
     setTripLogs([]);
-    setHosEntries([]);
     setDailyLogs({});
+    setCurrentDay(1);
     setHasTripData(false);
     setTripStatus(null);
   }, [logout]);
