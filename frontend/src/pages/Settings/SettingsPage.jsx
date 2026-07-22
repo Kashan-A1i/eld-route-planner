@@ -57,6 +57,39 @@ const SettingsPage = () => {
 
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const ruleConfig = {
+    'US 70-Hour/8-Day (Federal)': {
+      shiftLimit: '14 consecutive hours',
+      driveLimit: '11 hours maximum',
+      restPeriod: '10 consecutive hours',
+      restart: '34 consecutive hours',
+      break: '30 mins after 8 hours driving'
+    },
+    'US 60-Hour/7-Day (Federal)': {
+      shiftLimit: '14 consecutive hours',
+      driveLimit: '11 hours maximum',
+      restPeriod: '10 consecutive hours',
+      restart: '34 consecutive hours',
+      break: '30 mins after 8 hours driving'
+    },
+    'California Intrastate (80/8)': {
+      shiftLimit: '16 consecutive hours',
+      driveLimit: '12 hours maximum',
+      restPeriod: '10 consecutive hours',
+      restart: '34 consecutive hours',
+      break: '30 mins after 8 hours driving'
+    },
+    'Canada South (70/7)': {
+      shiftLimit: '16 consecutive hours',
+      driveLimit: '13 hours maximum',
+      restPeriod: '10 hours (min 8 consecutive)',
+      restart: '36 consecutive hours',
+      break: 'Not federally required (30m optional)'
+    }
+  };
+
+  const selectedRule = ruleConfig[hosRules.cycleRule] || ruleConfig['US 70-Hour/8-Day (Federal)'];
+
   return (
     <div className="settings-page-container">
       <div className="settings-page-header">
@@ -135,22 +168,32 @@ const SettingsPage = () => {
             <div className="setting-group">
               <h4>Cycle Rule</h4>
               <select className="select-input" value={hosRules.cycleRule} onChange={(e) => setHosRules({ cycleRule: e.target.value })}>
-                <option>70-Hour/8-Day</option>
-                <option>60-Hour/7-Day</option>
+                <option value="US 70-Hour/8-Day (Federal)">US 70-Hour/8-Day (Federal)</option>
+                <option value="US 60-Hour/7-Day (Federal)">US 60-Hour/7-Day (Federal)</option>
+                <option value="California Intrastate (80/8)">California Intrastate (80/8)</option>
+                <option value="Canada South (70/7)">Canada South (70/7)</option>
               </select>
             </div>
             
             <div className="readonly-rule">
+              <span className="rule-label">Shift Limit</span>
+              <span className="rule-value">{selectedRule.shiftLimit}</span>
+            </div>
+            <div className="readonly-rule">
+              <span className="rule-label">Driving Limit</span>
+              <span className="rule-value">{selectedRule.driveLimit}</span>
+            </div>
+            <div className="readonly-rule">
               <span className="rule-label">Rest Period</span>
-              <span className="rule-value">10 consecutive hours</span>
+              <span className="rule-value">{selectedRule.restPeriod}</span>
             </div>
             <div className="readonly-rule">
               <span className="rule-label">Restart Period</span>
-              <span className="rule-value">34 consecutive hours</span>
+              <span className="rule-value">{selectedRule.restart}</span>
             </div>
             <div className="readonly-rule">
               <span className="rule-label">Break Requirement</span>
-              <span className="rule-value">30 minutes after 8 hours driving</span>
+              <span className="rule-value">{selectedRule.break}</span>
             </div>
           </div>
         </div>

@@ -12,9 +12,9 @@ export const AuthProvider = ({ children }) => {
       name: 'Guest Driver',
       email: '',
       cdlNumber: '',
-      truckNumber: 'TRK-0000',
-      carrier: 'Demo Carrier LLC',
-      homeTerminal: 'Dallas, TX',
+      truckNumber: '',
+      carrier: '',
+      homeTerminal: '',
       isGuest: true,
     });
   };
@@ -22,12 +22,12 @@ export const AuthProvider = ({ children }) => {
   const login = (email, password) => {
     if (!email) return false;
     setUser({
-      name: 'John Mitchell',
+      name: email.split('@')[0], // Use email prefix as default name
       email: email,
-      cdlNumber: 'TX-CDL-482951',
-      truckNumber: 'TRK-4521',
-      carrier: 'Mitchell Freight Inc.',
-      homeTerminal: 'Dallas, TX',
+      cdlNumber: '',
+      truckNumber: '',
+      carrier: '',
+      homeTerminal: '',
       isGuest: false,
     });
     return true;

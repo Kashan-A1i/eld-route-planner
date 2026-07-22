@@ -8,7 +8,7 @@ import Header from './components/Header/Header';
 
 // Dashboard components
 import HOSChart from './components/HOSChart/HOSChart';
-import StatusCard from './components/StatusCard/StatusCard';
+import DriverProfileCard from './components/DriverProfileCard/DriverProfileCard';
 import LogEntries from './components/LogEntries/LogEntries';
 import ViolationsCard from './components/ViolationsCard/ViolationsCard';
 import HoursRecap from './components/HoursRecap/HoursRecap';
@@ -228,10 +228,7 @@ function App() {
             {/* ---- Middle Row: Status + Log Table ---- */}
             <section className="dashboard-middle-grid">
               <div id="current-status">
-                <StatusCard 
-                  active={hasTripData} 
-                  dailyLogs={dailyLogs}
-                />
+                <DriverProfileCard user={user} />
               </div>
               <div id="log-entries">
                 <LogEntries
@@ -329,11 +326,51 @@ function App() {
                   </button>
                 </form>
 
-                {tripStatus && (
+                {tripStatus && tripStatus.type !== 'success' && (
                   <div className={`trip-status ${tripStatus.type}`}>
-                    {tripStatus.type === 'success' && <MapPin size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />}
                     {tripStatus.type === 'loading' && <Truck size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />}
                     {tripStatus.message}
+                  </div>
+                )}
+
+                {hasTripData && tripStatus?.type === 'success' && (
+                  <div className="trip-results-block" style={{ marginTop: '24px', background: 'var(--bg-main)', borderRadius: '12px', padding: '20px', border: '1px solid var(--primary-accent)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--primary-accent)' }}>
+                      <MapPin size={20} />
+                      <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Trip Successfully Planned</h3>
+                    </div>
+                    
+                    {(() => {
+                      let tDrive = 0, tDuty = 0, tMiles = 0;
+                      Object.values(dailyLogs).forEach(log => {
+                        tDrive += (log.total_driving || 0);
+                        tDuty += (log.total_on_duty_not_driving || 0);
+                        tMiles += (log.total_miles || 0);
+                      });
+                      
+                      const formatH = (dec) => {
+                        const h = Math.floor(dec);
+                        const m = Math.round((dec - h) * 60);
+                        return `${h}h ${String(m).padStart(2, '0')}m`;
+                      };
+
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                          <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Est. Miles</div>
+                            <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{Math.round(tMiles).toLocaleString()}</div>
+                          </div>
+                          <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Driving</div>
+                            <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--status-driving)' }}>{formatH(tDrive)}</div>
+                          </div>
+                          <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total On-Duty</div>
+                            <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--status-onduty)' }}>{formatH(tDuty)}</div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>

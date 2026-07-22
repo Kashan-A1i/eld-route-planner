@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Download, CheckCircle, Clock, AlertCircle, Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import './RecordsPage.css';
 
 const RecordsPage = ({ active = false, dailyLogs = {} }) => {
+  const [popupMsg, setPopupMsg] = useState('');
   const formatHours = (decimalHours) => {
     const h = Math.floor(decimalHours);
     const m = Math.round((decimalHours - h) * 60);
@@ -39,6 +40,38 @@ const RecordsPage = ({ active = false, dailyLogs = {} }) => {
     { label: 'Pending', value: totalRecords, color: 'var(--status-onduty)', icon: <AlertCircle size={20} /> },
     { label: 'Amended', value: 0, color: 'var(--status-sleeper)', icon: <Clock size={20} /> }
   ];
+
+  const handleExportCSV = () => {
+    if (!records || records.length === 0) {
+      setPopupMsg('No records to export');
+      setTimeout(() => setPopupMsg(''), 3000);
+      return;
+    }
+    
+    // Create CSV header
+    const headers = ['Date', 'Day', 'Driving Hours', 'On Duty Hours', 'Total Hours', 'Miles', 'Status'];
+    
+    // Map records to CSV rows, wrapping strings in quotes to avoid comma issues
+    const csvRows = records.map(r => 
+      [r.date, r.day, `"${r.driving}"`, `"${r.onDuty}"`, `"${r.total}"`, r.miles, r.status].join(',')
+    );
+    
+    // Combine
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    
+    // Create Blob and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `ELD_Records_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setPopupMsg('Export Successful');
+    setTimeout(() => setPopupMsg(''), 3000);
+  };
 
   const getStatusBadge = (status) => {
     let className = 'status-badge ';
@@ -84,7 +117,16 @@ const RecordsPage = ({ active = false, dailyLogs = {} }) => {
             </div>
           </div>
         </div>
-        <button className="btn-outline"><Download size={16} /> Export CSV</button>
+        <div style={{ position: 'relative' }}>
+          <button className="btn-outline" onClick={handleExportCSV}>
+            <Download size={16} /> Export CSV
+          </button>
+          {popupMsg && (
+            <div className="btn-popup">
+              {popupMsg}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="stats-row">

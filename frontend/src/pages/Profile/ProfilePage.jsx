@@ -10,18 +10,18 @@ const ProfilePage = () => {
   const [personalInfo, setPersonalInfo] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    cdlNumber: 'TX-92837492',
-    phone: '(214) 555-0187',
-    homeTerminal: 'Dallas, TX',
+    cdlNumber: '',
+    phone: '',
+    homeTerminal: '',
   });
 
   // Vehicle Info State
   const [vehicleInfo, setVehicleInfo] = useState({
     truckNumber: user?.truckNumber || '',
-    trailerNumber: 'TRL-2847',
-    licensePlate: 'TX-4521-CMV',
-    makeModel: 'Freightliner Cascadia 2023',
-    vin: '1FUJGBDV7CLBP8834',
+    trailerNumber: '',
+    licensePlate: '',
+    makeModel: '',
+    vin: '',
   });
 
   // Carrier Info State
@@ -100,7 +100,7 @@ const ProfilePage = () => {
         <div className="profile-hero-info">
           <h2>{user?.name || 'Unknown Driver'}</h2>
           <p className="profile-role">Commercial Driver</p>
-          <p className="profile-member-since">Member since January 2024</p>
+          <p className="profile-member-since">Member since {new Date().getFullYear()}</p>
         </div>
       </div>
 
